@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Заявка на банковскую гарантию | AMG BG</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f7f9fc;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo h2 {
+      font-size: 2.5em;
+      color: #1a73e8;
+      margin: 0;
+    }
+    .logo span {
+      color: #d32f2f;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    input, textarea, select {
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      font-weight: normal;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    button {
+      margin-top: 25px;
+      padding: 12px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0d47a1;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <h2>AMG <span>BG</span></h2>
+    </div>
+    <h1>Заявка на банковскую гарантию</h1>
+    <form id="guaranteeForm">
+      <label for="amount">Сумма БГ (в рублях):</label>
+      <input type="text" id="amount" name="amount" placeholder="Например: 1 500 000" required />
+
+      <label for="endDate">Дата окончания действия БГ:</label>
+      <input type="date" id="endDate" name="endDate" required />
+
+      <label for="tender_number">Номер закупки:</label>
+      <input type="text" id="tender_number" name="tender_number" placeholder="Например: 0373200038924000001" required />
+
+      <label for="guarantee_type">Вид обеспечения:</label>
+      <select id="guarantee_type" name="guarantee_type" required>
+        <option value="">Выберите вид</option>
+        <option value="Обеспечение на участие">Обеспечение на участие</option>
+        <option value="Обеспечение на исполнение контракта">Обеспечение на исполнение контракта</option>
+        <option value="Обеспечение гарантийных обязательств">Обеспечение гарантийных обязательств</option>
+        <option value="Обеспечение аванса">Обеспечение аванса</option>
+      </select>
+
+      <label class="checkbox-label">
+        <input type="checkbox" id="advance_requirements" name="advance_requirements">
+        Требования по авансу
+      </label>
+
+      <label for="problem">Основная проблематика клиента:</label>
+      <textarea id="problem" name="problem" placeholder="Опишите, с чем вы сталкиваетесь..." required></textarea>
+
+      <label for="phone">Телефон для связи:</label>
+      <input type="tel" id="phone" name="phone" placeholder="+7 (999) 123-45-67" required />
+
+      <label for="email">Электронная почта:</label>
+      <input type="email" id="email" name="email" placeholder="example@domain.ru" required />
+
+      <button type="submit">Отправить заявку</button>
+    </form>
+    <div class="footer">
+      &copy; 2025 AMG BG. Все права защищены.
+    </div>
+  </div>
+
+  <script>
+    // Форматирование суммы с пробелами
+    const amountInput = document.getElementById('amount');
+    amountInput.addEventListener('input', function (e) {
+      let value = e.target.value.replace(/\D/g, '');
+      e.target.value = value ? new Intl.NumberFormat('ru-RU').format(value) : '';
+    });
+
+    // Отправка формы
+    document.getElementById('guaranteeForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData);
+      data.timestamp = new Date().toLocaleString('ru-RU');
+
+      // Сохранение в localStorage
+      let applications = JSON.parse(localStorage.getItem('bgApplications') || '[]');
+      applications.push(data);
+      localStorage.setItem('bgApplications', JSON.stringify(applications));
+
+      // Отправка на Formspree
+      fetch('https://formspree.io/f/xvovwqzq', {
+        method: 'POST',
+        body: new FormData(this),
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => {
+        if (
